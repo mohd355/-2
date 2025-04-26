@@ -1,0 +1,35 @@
+struct LoginView: View {
+    @State private var email = ""
+    @State private var password = ""
+    let switchToRegister: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Image("app_logo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 150)
+            
+            TextField("البريد الإلكتروني", text: $email)
+                .textFieldStyle(AuthTextFieldStyle())
+            
+            SecureField("كلمة المرور", text: $password)
+                .textFieldStyle(AuthTextFieldStyle())
+            
+            Button("تسجيل الدخول") {
+                // Handle login
+            }
+            .buttonStyle(PrimaryButtonStyle())
+            
+            HStack {
+                Text("ليس لديك حساب؟")
+                Button("سجل الآن") {
+                    switchToRegister()
+                }
+                .foregroundColor(.primaryGreen)
+            }
+        }
+        .padding()
+        .navigationTitle("تسجيل الدخول")
+    }
+}
