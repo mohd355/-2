@@ -1,0 +1,61 @@
+struct RegisterDetailsView: View {
+    let userType: UserType
+    let onComplete: () -> Void
+    
+    @State private var email = ""
+    @State private var password = ""
+    @State private var confirmPassword = ""
+    @State private var phone = ""
+    @State private var firstName = ""
+    @State private var lastName = ""
+    @State private var stadiumLocation = ""
+    @State private var selectedSports: [SportType] = []
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                // Basic Info
+                Group {
+                    TextField("البريد الإلكتروني", text: $email)
+                    SecureField("كلمة المرور", text: $password)
+                    SecureField("تأكيد كلمة المرور", text: $confirmPassword)
+                    TextField("رقم الجوال", text: $phone)
+                        .keyboardType(.phonePad)
+                    TextField("الاسم الأول", text: $firstName)
+                    TextField("اسم العائلة", text: $lastName)
+                }
+                .textFieldStyle(AuthTextFieldStyle())
+                
+                // Stadium Owner Specific Fields
+                if userType == .stadiumOwner {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("موقع الملعب")
+                            .font(.headline)
+                        
+                        TextField("أدخل العنوان أو الإحداثيات", text: $stadiumLocation)
+                            .textFieldStyle(AuthTextFieldStyle())
+                        
+                        Text("اختر أنواع الرياضات المتاحة")
+                            .font(.headline)
+                            .padding(.top, 10)
+                        
+                        SportSelectionView(selectedSports: $selectedSports)
+                    }
+                }
+                
+                Button("إنشاء الحساب") {
+                    registerUser()
+                }
+                .buttonStyle(PrimaryButtonStyle())
+                .padding(.top, 20)
+            }
+            .padding()
+        }
+        .navigationTitle(userType == .player ? "تسجيل لاعب" : "تسجيل صاحب ملعب")
+    }
+    
+    func registerUser() {
+        // Handle registration based on userType
+        onComplete()
+    }
+}
