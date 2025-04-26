@@ -1,0 +1,148 @@
+enum SportType: String, CaseIterable, Identifiable {
+    case football = "كرة قدم"
+    case tennis = "تنس"
+    case padel = "بادل"
+    case volleyball = "طائرة"
+    case basketball = "سلة"
+    
+    var id: String { rawValue }
+    
+    var icon: String {
+        switch self {
+        case .football: return "soccerball"
+        case .tennis: return "tennis.racket"
+        case .padel: return "figure.tennis"
+        case .volleyball: return "volleyball"
+        case .basketball: return "basketball.fill"
+        }
+    }
+}
+
+struct SportSelectionView: View {
+    @Binding var selectedSports: [SportType]
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("اختيار متعدد - اضغط على الرياضات المناسبة")
+                .font(.caption)
+                .foregroundColor(.gray)
+            
+            FlowLayout(spacing: 10) {
+                ForEach(SportType.allCases) { sport in
+                    SportChip(
+                        sport: sport,
+                        isSelected: selectedSports.contains(sport)
+                    ) {
+                        if selectedSports.contains(sport) {
+                            selectedSports.removeAll { $0 == sport }
+                        } else {
+                            selectedSports.append(sport)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct SportChip: View {
+    let sport: SportType
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 5) {
+                Image(systemName: sport.icon)
+                Text(sport.rawValue)
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(
+                Capsule()
+                    .fill(isSelected ? Color.primaryGreen : Color.gray.opacity(0.2))
+            )
+            .foregroundColor(isSelected ? .white : .primary)
+        }
+    }
+}
+
+// Helper View for flexible layout
+struct FlowLayout<Data: Collection, Content: View>: View where Data.Element: Hashable {
+    let data: Data
+    let spacing: CGFloat
+    let content: (Data.Element) -> Content
+    
+    @State private var height: CGFloat = 0
+    
+    init(
+        spacing: CGFloat = 8,
+        data: Data,
+        @ViewBuilder content: @escaping (Data.Element) -> Content
+    ) {
+        self.spacing = spacing
+        self.data = data
+        self.content = content
+    }
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .topLeading) {
+                ForEach(computeElements(geometry.size.width), id: \.self) { element in
+                    content(element)
+                        .alignmentGuide(.leading) { _ in
+                            -(element.offset.x)
+                        }
+                        .alignmentGuide(.top) { _ in
+                            -(element.offset.y)
+                        }
+                }
+            }
+            .frame(height: height)
+        }
+    }
+    
+    private func computeElements(_ width: CGFloat) -> [FlowLayoutElement<Data.Element>] {
+        var elements: [FlowLayoutElement<Data.Element>] = []
+        var currentPosition: CGPoint = .zero
+        var lineHeight: CGFloat = 0
+        
+        for element in data {
+            let view = content(element)
+            let size = viewSize(for: view)
+            
+            if currentPosition.x + size.width > width {
+                currentPosition.x = 0
+                currentPosition.y += lineHeight + spacing
+                lineHeight = 0
+            }
+            
+            elements.append(
+                FlowLayoutElement(
+                    element: element,
+                    offset: currentPosition
+                )
+            )
+            
+            currentPosition.x += size.width + spacing
+            lineHeight = max(lineHeight, size.height)
+        }
+        
+        DispatchQueue.main.async {
+            self.height = currentPosition.y + lineHeight
+        }
+        
+        return elements
+    }
+    
+    private func viewSize(for view: some View) -> CGSize {
+        let controller = UIHostingController(rootView: view)
+        let size = controller.view.intrinsicContentSize
+        return CGSize(width: size.width, height: size.height)
+    }
+}
+
+struct FlowLayoutElement<Element>: Hashable {
+    let element: Element
+    let offset: CGPoint
+}
