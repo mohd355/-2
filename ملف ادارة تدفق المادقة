@@ -1,0 +1,30 @@
+struct AuthFlowView: View {
+    @State private var isShowingLogin = true
+    @State private var userType: UserType?
+    
+    var body: some View {
+        NavigationStack {
+            if isShowingLogin {
+                LoginView(switchToRegister: {
+                    isShowingLogin = false
+                })
+            } else {
+                if let userType = userType {
+                    RegisterDetailsView(userType: userType) {
+                        self.userType = nil
+                        isShowingLogin = true
+                    }
+                } else {
+                    UserTypeSelectionView { selectedType in
+                        userType = selectedType
+                    }
+                }
+            }
+        }
+    }
+}
+
+enum UserType {
+    case player
+    case stadiumOwner
+}
