@@ -1,0 +1,60 @@
+struct UserTypeSelectionView: View {
+    let onSelect: (UserType) -> Void
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            Text("اختر نوع الحساب")
+                .font(.title2)
+                .padding(.bottom, 20)
+            
+            UserTypeCard(
+                title: "لاعب",
+                icon: "person.fill",
+                description: "ابحث عن ملاعب واحجز مباريات"
+            ) {
+                onSelect(.player)
+            }
+            
+            UserTypeCard(
+                title: "صاحب ملعب",
+                icon: "building.columns.fill",
+                description: "أدر ملعبك واستقبل الحجوزات"
+            ) {
+                onSelect(.stadiumOwner)
+            }
+        }
+        .padding()
+        .navigationTitle("تسجيل جديد")
+    }
+}
+
+struct UserTypeCard: View {
+    let title: String
+    let icon: String
+    let description: String
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 15) {
+                Image(systemName: icon)
+                    .font(.system(size: 40))
+                    .foregroundColor(.primaryGreen)
+                
+                Text(title)
+                    .font(.headline)
+                
+                Text(description)
+                    .font(.caption)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.gray)
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 15)
+                    .stroke(Color.primaryGreen, lineWidth: 2)
+            )
+        }
+    }
+}
